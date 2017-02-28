@@ -1,0 +1,22 @@
+* {
+	font-family: Microsoft YaHei, sans-serif;
+}
+
+a {
+	color: #66DDFF;
+	text-decoration: none;
+}
+
+li{
+	list-style: none;
+	padding-top: 5px;
+}
+
+li > a {
+	color: #000;
+	text-decoration: none;
+}
+
+li a:hover {
+	color: #66DDFF;
+}
