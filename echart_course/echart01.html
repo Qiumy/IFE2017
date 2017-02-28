@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>ECharts</title>
+    <title>ECharts NO.1 - 零基础绘制ECharts图表</title>
     <!-- 引入 echarts.js -->
     <script src="echarts.min.js"></script>
 </head>
@@ -16,28 +16,47 @@
         // 指定图表的配置项和数据
         var option = {
             title: {
-                text: 'ECharts 入门示例'
+                show: false
             },
             tooltip: {},
             legend: {
-                data:['销量']
+                data:['邮件营销','联盟广告','视频广告','广告'],
             },
-            xAxis: {
-                data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
-            },
-            yAxis: {},
+            xAxis : [
+                {
+                    type : 'category',
+                    data : ['周一','周二','周三','周四','周五','周六','周日']
+                }
+            ],
+            yAxis : [
+                {
+                    type : 'value'
+                }
+            ],
             series: [
-            	{
-                	name: '销量',
-                	type: 'bar',
-                	data: [5, 20, 36, 10, 10, 20]
-            	},
-            	{
-                	name: '销量',
-                	type: 'line',
-                	data: [5, 20, 36, 10, 10, 20],
-                	color: '#999'
-            	}
+                {
+                    name:'邮件营销',
+                    type:'bar',
+                    stack: '广告',
+                    data:[120, 132, 101, 134, 90, 230, 210]
+                },
+                {
+                    name:'联盟广告',
+                    type:'bar',
+                    stack: '广告',
+                    data:[220, 182, 191, 234, 290, 330, 310]
+                },
+                {
+                    name:'视频广告',
+                    type:'bar',
+                    stack: '广告',
+                    data:[150, 232, 201, 154, 190, 330, 410]
+                },
+                {
+                    name:'广告',
+                    type:'line',
+                    data:[480, 546, 493, 522, 570, 890, 930]
+                }
             ]
         };
 
