@@ -68,12 +68,23 @@
                         },
                         interval: 0,
                     }
+                },{
+                    axisLine: {
+                        lineStyle: {
+                            color: '#927419',
+                            width: 2
+                        }
+                    },
+                    z: 5
                 }
             ],
             yAxis : [
                 {
                     type : 'value',
                     inverse: 'true',
+                    min: 0,
+                    max: 3.5,
+                    interval: 1,
                     position: 'right',
                     axisLine:{
                         show: false,
@@ -108,7 +119,17 @@
                     type:'bar',
                     data:[0.8, 3.2, 1.5, 2.1, 2.05, 1.9, 0.5, 0.98, 1.6, 1.01],
                 }
-            ]
+            ],
+            graphic:{
+                type:'text',
+                style:{
+                    text:'Sources:World Bank;Census Bureau;EIU',
+                    font:'16px sans-serif',
+                    fill:'#aaaaaa'
+                },
+                bottom:10,
+                left:'10%',
+            }
         };
 
         // 使用刚指定的配置项和数据显示图表。
