@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts NO.3 - 绘制地图</title>
+    <!-- 引入 echarts.js -->
+    <script src="echarts.min.js"></script>
+    <script src="jquery-3.1.1.min.js"></script>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 600px;height:400px;"></div>
+    <script type="text/javascript">
+        $.get('./map/world.json', function (chinaJson) {
+            echarts.registerMap('china', chinaJson);
+            var chart = echarts.init(document.getElementById('main'));
+            chart.setOption({
+                series: [{
+                    type: 'map',
+                    map: 'china'
+                }]
+            });
+        });
+    </script>
+</body>
+</html>
