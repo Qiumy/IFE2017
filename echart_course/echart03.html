@@ -11,13 +11,13 @@
     <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
     <div id="main" style="width: 600px;height:400px;"></div>
     <script type="text/javascript">
-        $.get('./map/world.json', function (chinaJson) {
-            echarts.registerMap('china', chinaJson);
+        $.get('./map/world.json', function (worldJson) {
+            echarts.registerMap('word', worldJson);
             var chart = echarts.init(document.getElementById('main'));
             chart.setOption({
                 series: [{
                     type: 'map',
-                    map: 'china'
+                    map: 'word'
                 }]
             });
         });
