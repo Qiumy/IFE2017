@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts No.5 - 动态数据</title>
+    <!-- 引入 echarts.js -->
+    <script src="echarts.min.js"></script>
+    <script src="jquery-3.1.1.min.js"></script>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 800px;height:600px;"></div>
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById('main'));
+        myChart.showLoading();
+
+        function formatterData(kdata) {
+            var categoryData = [];
+            var values = [];
+            var volumns = [];
+            var pattern = /(\d{4})(\d{2})(\d{2})/;
+            for(var i = 0, len = kdata.length; i < len; i++){
+                var a = kdata[i].Date;
+                var newDate = a.replace(pattern, '$1-$2-$3');
+                categoryData.push(newDate);
+                values.push([kdata[i].Open,kdata[i].Close,kdata[i].Low,kdata[i].High]);
+                volumns.push(kdata[i].Volume);
+            }
+            return {
+                categoryData: categoryData,
+                values: values,
+                volumns: volumns
+            };
+        }
+
+        function calculateMA(dayCount, data) {
+            var result = [];
+            for (var i = 0, len = data.values.length; i < len; i++) {
+                if (i < dayCount) {
+                    result.push('-');
+                    continue;
+                }
+                var sum = 0;
+                for (var j = 0; j < dayCount; j++) {
+                    sum += parseFloat(data.values[i - j][1]);
+                    console.log(typeof sum);
+                }
+                result.push(+(sum / dayCount).toFixed(3));
+            }
+            return result;
+        }
+
+        $.get('./data/PBG.json', function (kdata) {
+
+            var flag = 0;
+            var showData = formatterData(kdata.slice(0,30));
+
+            function addData() {
+                if(flag < kdata.length){
+                    showData = formatterData(kdata.slice(flag,flag+30));
+                    flag += 1;
+                }
+            }
+            myChart.hideLoading();
+            var option = {
+                backgroundColor: '#fff',
+                animation: false,
+                title: {
+                    text: '股票数据'
+                },
+                legend: {
+                    data: ['日k','MA5', 'MA10', 'MA20', 'MA30','成交量']
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'line'
+                    }
+                },
+                grid: [
+                    {
+                        left: '10%',
+                        right: '8%',
+                        height: '50%'
+                    },
+                    {
+                        left: '10%',
+                        right: '8%',
+                        top: '63%',
+                        height: '16%'
+                    }
+                ],
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: showData.categoryData,
+                        scale: true,
+                        boundaryGap : false,
+                        axisLine: {onZero: false},
+                        splitLine: {show: false},
+                        splitNumber: 20,
+                        min: 'dataMin',
+                        max: 'dataMax'
+                    },
+                    {
+                        type: 'category',
+                        gridIndex: 1,
+                        data: showData.categoryData,
+                        scale: true,
+                        boundaryGap : false,
+                        axisLine: {onZero: false},
+                        axisTick: {show: false},
+                        splitLine: {show: false},
+                        axisLabel: {show: false},
+                        splitNumber: 20,
+                        min: 'dataMin',
+                        max: 'dataMax'
+                    }
+                ],
+                yAxis: [
+                    {
+                        scale: true,
+                        splitArea: {
+                            show: true
+                        }
+                    },
+                    {
+                        scale: true,
+                        gridIndex: 1,
+                        splitNumber: 2,
+                        axisLabel: {show: false},
+                        axisLine: {show: false},
+                        axisTick: {show: false},
+                        splitLine: {show: false}
+                    }
+                ],
+                series: [
+                    {
+                        name: '日k',
+                        type: 'candlestick',
+                        data: showData.values,
+                        itemStyle: {
+                            normal: {
+                                borderColor: null,
+                                borderColor0: null
+                            }
+                        },
+                        tooltip: {
+                            formatter: function (param) {
+                                var param = param[0];
+                                return [
+                                    'Date: ' + param.name + '<hr size=1 style="margin: 3px 0">',
+                                    'Open: ' + param.data[0] + '<br/>',
+                                    'Close: ' + param.data[1] + '<br/>',
+                                    'Lowest: ' + param.data[2] + '<br/>',
+                                    'Highest: ' + param.data[3] + '<br/>'
+                                ].join('');
+                            }
+                        }
+                    },
+                    {
+                        name: 'MA5',
+                        type: 'line',
+                        data: calculateMA(5, showData),
+                        smooth: true,
+                        lineStyle: {
+                            normal: {opacity: 0.5}
+                        }
+                    },
+                    {
+                        name: 'MA10',
+                        type: 'line',
+                        data: calculateMA(10, showData),
+                        smooth: true,
+                        lineStyle: {
+                            normal: {opacity: 0.5}
+                        }
+                    },
+                    {
+                        name: 'MA20',
+                        type: 'line',
+                        data: calculateMA(20, showData),
+                        smooth: true,
+                        lineStyle: {
+                            normal: {opacity: 0.5}
+                        }
+                    },
+                    {
+                        name: 'MA30',
+                        type: 'line',
+                        data: calculateMA(30, showData),
+                        smooth: true,
+                        lineStyle: {
+                            normal: {opacity: 0.5}
+                        }
+                    },
+                    {
+                        name: '成交量',
+                        type: 'bar',
+                        xAxisIndex: 1,
+                        yAxisIndex: 1,
+                        data: showData.volumns
+                    }
+                ]
+            };
+            setInterval(function () {
+                addData();
+                myChart.setOption({
+                    xAxis: {
+                        data: showData.categoryData
+                    },
+                    series: [{
+                        name: '日k',
+                        data: showData.values
+                    },
+                    {
+                        name: 'MA5',
+                        data: calculateMA(5, showData)
+                    },
+                    {
+                        name: 'MA10',
+                        data: calculateMA(10, showData)
+                    },
+                    {
+                        name: 'MA20',
+                        data: calculateMA(20, showData),
+                    },
+                    {
+                        name: 'MA30',
+                        data: calculateMA(30, showData),
+                    },
+                    {
+                        name: '成交量',
+                        data: showData.volumns
+                    }]
+                });
+            }, 200);;
+            myChart.setOption(option);
+        });
+    </script>
+</body>
+</html>
