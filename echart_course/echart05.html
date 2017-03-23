@@ -43,7 +43,7 @@
                 var sum = 0;
                 for (var j = 0; j < dayCount; j++) {
                     sum += parseFloat(data.values[i - j][1]);
-                    console.log(typeof sum);
+                    // console.log(typeof sum);
                 }
                 result.push(+(sum / dayCount).toFixed(3));
             }
@@ -53,12 +53,14 @@
         $.get('./data/PBG.json', function (kdata) {
 
             var flag = 0;
-            var showData = formatterData(kdata.slice(0,30));
-
+            var showData = formatterData(kdata.slice(0,200));
+            var myInterval;
             function addData() {
-                if(flag < kdata.length){
+                if(flag+30 < kdata.length){
                     showData = formatterData(kdata.slice(flag,flag+30));
                     flag += 1;
+                }else{
+                    window.clearInterval(myInterval);
                 }
             }
             myChart.hideLoading();
@@ -203,7 +205,7 @@
                     }
                 ]
             };
-            setInterval(function () {
+            myInterval = setInterval(function () {
                 addData();
                 myChart.setOption({
                     xAxis: {
