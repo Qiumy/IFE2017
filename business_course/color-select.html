@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>UI组件之色彩选择器</title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="color-select.css">
+</head>
+<body>
+<aside class="main">
+	<canvas id="main"></canvas>
+	<div id="circle1"></div>
+</aside>
+
+<aside class="barsel">
+	<canvas id="side"></canvas>
+	<div id="circle2"></div>
+</aside>
+<aside>
+	<div id="colshow"></div>
+	<div class="sel">
+		<label for="r-select">R</label>
+		<input type="number" id="r-select">
+	</div>
+	<div class="sel">
+		<label for="g-select">G</label>
+		<input type="number" id="g-select">
+	</div>
+	<div class="sel">
+		<label for="b-select">B</label>
+		<input type="number" id="b-select">
+	</div>
+	<hr>
+	<div class="sel">
+		<label for="h-select">H</label>
+		<input type="number" id="h-select">
+	</div>
+	<div class="sel">
+		<label for="s-select">S</label>
+		<input type="number" id="s-select">
+	</div>
+	<div class="sel">
+		<label for="l-select">L</label>
+		<input type="number" id="l-select">
+	</div>
+</aside>
+
+<script type="text/javascript">
+	// 绘制色带
+	var sideDom = document.getElementById('side');
+	sideDom.height = 400;
+	sideDom.width = 20;
+	var sideContext = sideDom.getContext("2d");
+	var sideGrd = sideContext.createLinearGradient(0,0,0,400);
+	var colors = ["rgb(255,0,0)", "rgb(255,255,0)", "rgb(0,255,0)","rgb(0,255,255)", "rgb(0,0,255)", "rgb(255,0,255)"]
+
+	for(var i=0; i<colors.length; i++){
+		sideGrd.addColorStop(i*0.16, colors[i]);
+	}
+	sideGrd.addColorStop(1, colors[0]);
+	sideContext.fillStyle = sideGrd;
+	sideContext.fillRect(0,0,20,400);
+	// 色带监听事件
+	var circle1 = document.getElementById("circle1");
+	var circle2 = document.getElementById("circle2");
+	var colshow = document.getElementById("colshow");
+	var isDown = false;
+	sideDom.onmousedown = function (event) {
+		var event = event || window.event;
+		console.log("mousedown");
+		isDown = true;
+		if (event.offsetY>=0) {
+			var imagedates=sideContext.getImageData(10,event.offsetY,1,1).data;
+			var color = "rgb(" + imagedates[0] + "," + imagedates[1] + ", " + imagedates[2] + ")";
+			// console.log(color);
+			drawMain(color);
+			update(imagedates);
+
+			console.log(event.offsetX, event.offsetY);
+			// circle2.style.visibility = "visible";
+			var y = event.offsetY;
+			circle2.style.top = y+"px";
+
+			circle1.style.left = "200px";
+			circle1.style.top = "200px";
+		}
+	};
+
+	// sideDom.onmousemove = function (event){
+	// 	var event = event || window.event;
+	// 	console.log("mousemove");
+	// 	if (event.offsetY>=0 && isDown) {
+	// 		var imagedates=sideContext.getImageData(10,event.offsetY,1,1).data;
+	// 		var color = "rgb(" + imagedates[0] + "," + imagedates[1] + ", " + imagedates[2] + ")";
+	// 		// console.log(color);
+	// 		drawMain(color);
+	// 		update(imagedates);
+
+	// 		// console.log(event.offsetX, event.offsetY);
+	// 		circle2.style.visibility = "visible";
+	// 		var y = event.offsetY;
+	// 		circle2.style.top = y+"px";
+	// 	}
+	// };
+	// sideDom.onmouseup = function (event) {
+	// 	var event = event || window.event;
+	// 	console.log("mouseup");
+	// 	isDown = false;
+	// };
+
+
+
+	var mainDom = document.getElementById("main");
+	main.height = 400;
+	main.width = 400;
+	var mainContext = mainDom.getContext("2d");
+
+
+	function drawMain(color){
+		var mainGrd = mainContext.createLinearGradient(0,0,400,400);
+		mainGrd.addColorStop(0, "white");
+		mainGrd.addColorStop(0.5, color);
+		mainGrd.addColorStop(1, "black");
+		mainContext.fillStyle = mainGrd;
+		mainContext.fillRect(0,0,400,400);
+	};
+
+	mainDom.onmousedown = function (event){
+		var imagedates=mainContext.getImageData(event.offsetX,event.offsetY,1,1).data;
+		// console.log("main click" + imagedates);
+		update(imagedates);
+		// circle1.style.visibility = "visible";
+		circle1.style.left = (event.offsetX+4)+"px";
+		circle1.style.top = event.offsetY+"px";
+	};
+
+	function update(colors){
+		var color = "rgb(" + colors[0] + "," + colors[1] + ", " + colors[2] + ")";
+		colshow.style.backgroundColor = color;
+		var red = colors[0], green = colors[1], blue = colors[2];
+		var rInput = document.getElementById("r-select");
+		var gInput = document.getElementById("g-select");
+		var bInput = document.getElementById("b-select");
+
+		rInput.value = red;
+		gInput.value = green;
+		bInput.value = blue;
+
+		var hsl = rgbTohsl(red, green, blue);
+		var hInput = document.getElementById("h-select");
+		var sInput = document.getElementById("s-select");
+		var lInput = document.getElementById("l-select");
+
+		hInput.value = hsl[0];
+		sInput.value = hsl[1];
+		lInput.value = hsl[2];
+
+		var doms = [rInput, gInput, bInput];
+		for(var i=0; i<doms.length; i++){
+			(function attatch(i){
+				var dom = doms[i];
+				dom.onchange = function(){
+					var val = dom.value;
+					colors[i] = val;
+					update(colors);
+					updateboard(colors);
+				};
+			})(i);
+		};
+
+		var doms2 = [hInput, sInput, lInput];
+		var hslcolor = rgbTohsl(colors[0], colors[1], colors[2]);
+		// console.log("hslcolor:" + hslcolor);
+
+		for(var i=0; i<doms2.length; i++){
+			(function attatch(i){
+				var dom = doms2[i];
+				dom.onchange = function(){
+					var val = dom.value;
+					hslcolor[i] = val;
+					// console.log("hslcolor:" + hslcolor);
+
+					colors = hslTorgb(hslcolor);
+					// console.log("colors:" + colors);
+					update(colors);
+					updateboard(colors);
+				};
+			})(i);
+		};
+	};
+
+	function rgbTohsl(r,g,b){
+		r /= 255;
+		g /= 255;
+		b /= 255;
+		var min = Math.min.apply(Array, [r, g, b]),
+		max = Math.max.apply(Array, [r, g, b]);
+		var h, s, l;
+		if (max == min) {
+			h = 0;
+		}
+		else if (max == r && g >= b) {
+			h = 60 * (g - b) / (max - min);
+		}
+		else if (max == r && g < b) {
+			h = 60 * (g - b) / (max - min) + 360;
+		}
+		else if (max == g) {
+			h = 60 * (b - r) / (max - min) + 120;
+		}
+		else if (max == b) {
+			h = 60 * (r - g) / (max - min) + 240;
+		}
+		l = (max + min) / 2;
+		if (l == 0 || max == min) {
+			s = 0;
+		}
+		else if (l > 0 && l <= 0.5) {
+			s = (max - min) / (2 * l);
+		}
+		else if (l > 0.5) {
+			s = (max - min) / (2 - 2 * l);
+		}
+		// console.log("hsl" + h + "," + s + ","+l);
+		return [Math.round(h), Math.round(s * 100) / 100, Math.round(l * 100) / 100];
+	};
+
+	function hslTorgb(hsl){
+		var h = hsl[0] - 0,s = hsl[1] - 0,l = hsl[2] - 0;
+
+		var r, g, b;
+		if (s == 0) {
+		    r = g = b = l;
+		}
+		else {
+			var p, q, k;
+			if (l < 0.5) {
+			    q = l * (1 + s);
+			}
+			else if (l >= 0.5) {
+			    q = l + s - (l * s);
+			}
+			p = 2 * l - q;
+			k = h / 360;
+
+			r = singleColorCalculation(k + 1 / 3);
+			g = singleColorCalculation(k);
+			b = singleColorCalculation(k - 1 / 3);
+		}
+
+		return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+
+		function singleColorCalculation(k) {
+			var color;
+			if (k < 0) {
+			    k += 1;
+			}
+			if (k > 1) {
+			    k -= 1;
+			}
+
+			if (k * 6 < 1) {
+			    color = p + ((q - p) * 6 * k);
+			}
+			else if (k * 6 >= 1 && k < 0.5) {
+			    color = q;
+			}
+			else if (k >= 0.5 && 3 * k < 2) {
+			    color = p + ((q - p) * 6 * (2 / 3 - k));
+			}
+			else {
+			    color = p;
+			}
+			return color;
+		}
+	}
+
+	function updateboard(color){
+		var newcolor = "rgb(" + color[0] + "," + color[1] + ", " + color[2] + ")";
+		drawMain(newcolor);
+	}
+
+</script>
+</body>
+</html>
